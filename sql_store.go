@@ -3,11 +3,20 @@ package raftsqlite
 import (
 	"database/sql"
 	"encoding/binary"
+	"fmt"
 	"github.com/hashicorp/raft"
+
+	// sql lite driver import
+	_ "github.com/mattn/go-sqlite3"
+)
+
+var (
+	ErrKeyNotFound = fmt.Errorf("requested key not found")
 )
 
 const (
 	driverName = "sqlite3"
+	dbName = "raft-sqlite.db"
 )
 
 // Queries
@@ -48,20 +57,20 @@ var schemaQueries = []string{
 
 type SQLStore struct {
 	db *sql.DB
-
 	path string
 }
 
 
 func NewSQLStore(path string) (*SQLStore, error) {
-	db, err := newDB(path)
+	dbFullPath := fmt.Sprintf("%s/%s", path, dbName)
+	db, err := newDB(dbFullPath)
 	if err != nil {
 		return nil, err
 	}
 
 	SQLStore := SQLStore{
 		db:     db,
-		path: path,
+		path: dbFullPath,
 	}
 
 	for _, query := range schemaQueries {
@@ -172,7 +181,14 @@ func (s SQLStore) Set(key, val []byte) error {
 func (s SQLStore) Get(key []byte) ([]byte, error) {
 	var value []byte
 	err := s.db.QueryRow(getQuery, string(key)).Scan(&value)
-	return value, err
+	if err != nil {
+		return nil ,err
+	}
+
+	if value == nil {
+		return nil , ErrKeyNotFound
+	}
+	return value, nil
 }
 
 func (s SQLStore) SetUint64(key []byte, val uint64) error {
@@ -187,14 +203,14 @@ func (s SQLStore) GetUint64(key []byte) (uint64, error) {
 		return 0, err
 	}
 	if len(b) == 0 {
-		return 0, nil
+		return 0, ErrKeyNotFound
 	}
 	val := binary.LittleEndian.Uint64(b)
 	return val, nil
 }
 
-func (s SQLStore) Close() {
-	s.db.Close()
+func (s SQLStore) Close() error {
+	return s.db.Close()
 }
 
 
