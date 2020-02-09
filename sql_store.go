@@ -66,7 +66,7 @@ func NewSQLStore(path string) (*SQLStore, error) {
 		return nil, err
 	}
 
-	SQLStore := SQLStore{
+	store := SQLStore{
 		db:   db,
 		path: dbFullPath,
 	}
@@ -78,7 +78,7 @@ func NewSQLStore(path string) (*SQLStore, error) {
 		}
 	}
 
-	return &SQLStore, nil
+	return &store, nil
 }
 
 func newDB(path string) (*sql.DB, error) {
