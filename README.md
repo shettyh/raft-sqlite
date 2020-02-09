@@ -1,4 +1,4 @@
-# raft-sqlite : Sqlite Raft backend
+# raft-sqlite : Raft backend using Sqlite
 
 ![Master](https://github.com/shettyh/raft-sqlite/workflows/Master/badge.svg)
 
