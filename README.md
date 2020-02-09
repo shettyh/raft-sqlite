@@ -7,4 +7,4 @@ This repository provides the raftsqlite package. The package exports the SQLStor
 It is meant to be used as a backend for the `raft` [package
 here](https://github.com/hashicorp/raft).
 
-This implementation uses Sqlite. This implementation is inspired by [raft-boltdb](https://github.com/hashicorp/raft-boltdb) and [Github Orchestrator] (https://github.com/github/orchestrator)
+This implementation uses Sqlite. This implementation is inspired by [raft-boltdb](https://github.com/hashicorp/raft-boltdb) and [Github Orchestrator](https://github.com/github/orchestrator)
