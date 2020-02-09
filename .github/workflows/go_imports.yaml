@@ -1,4 +1,4 @@
-name: gofmt
+name: goimports
 on:
   push:
     branches:
