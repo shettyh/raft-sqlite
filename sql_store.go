@@ -16,7 +16,7 @@ var (
 
 const (
 	driverName = "sqlite3"
-	dbName = "raft-sqlite.db"
+	dbName     = "raft-sqlite.db"
 )
 
 // Queries
@@ -26,8 +26,8 @@ const (
 	getLogForIndexQuery = `SELECT l_index, term, type, data FROM r_log WHERE l_index = ?`
 	storeLogQuery       = `REPLACE INTO r_log (l_index, term, type, data) VALUES (?, ?, ?, ?)`
 	deleteRangeQuery    = `DELETE FROM r_log WHERE l_index >= ? AND l_index <= ?`
-	setQuery    = `REPLACE INTO r_store (key, value) VALUES (?, ?)`
-	getQuery    = `SELECT min(value) FROM r_store WHERE key = ?`
+	setQuery            = `REPLACE INTO r_store (key, value) VALUES (?, ?)`
+	getQuery            = `SELECT min(value) FROM r_store WHERE key = ?`
 )
 
 // SQL schema
@@ -55,10 +55,9 @@ var schemaQueries = []string{
 }
 
 type SQLStore struct {
-	db *sql.DB
+	db   *sql.DB
 	path string
 }
-
 
 func NewSQLStore(path string) (*SQLStore, error) {
 	dbFullPath := fmt.Sprintf("%s/%s", path, dbName)
@@ -68,7 +67,7 @@ func NewSQLStore(path string) (*SQLStore, error) {
 	}
 
 	SQLStore := SQLStore{
-		db:     db,
+		db:   db,
 		path: dbFullPath,
 	}
 
@@ -81,7 +80,6 @@ func NewSQLStore(path string) (*SQLStore, error) {
 
 	return &SQLStore, nil
 }
-
 
 func newDB(path string) (*sql.DB, error) {
 	// TODO: expose the sqlite PRAGMA to outside env
@@ -139,7 +137,7 @@ func (s SQLStore) StoreLogs(logs []*raft.Log) error {
 			return err
 		}
 	}
-	
+
 	return tx.Commit()
 }
 
@@ -164,11 +162,11 @@ func (s SQLStore) Get(key []byte) ([]byte, error) {
 	var value []byte
 	err := s.db.QueryRow(getQuery, string(key)).Scan(&value)
 	if err != nil {
-		return nil ,err
+		return nil, err
 	}
 
 	if value == nil {
-		return nil , ErrKeyNotFound
+		return nil, ErrKeyNotFound
 	}
 	return value, nil
 }
@@ -194,5 +192,3 @@ func (s SQLStore) GetUint64(key []byte) (uint64, error) {
 func (s SQLStore) Close() error {
 	return s.db.Close()
 }
-
-

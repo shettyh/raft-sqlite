@@ -12,7 +12,7 @@ import (
 )
 
 func testStore(t testing.TB) *SQLStore {
-	path, err := ioutil.TempDir("", "raft");
+	path, err := ioutil.TempDir("", "raft")
 	if err != nil {
 		t.Fatalf("err : %s", err)
 	}
@@ -27,7 +27,7 @@ func testStore(t testing.TB) *SQLStore {
 
 func testRaftLog(idx uint64, data string) *raft.Log {
 	return &raft.Log{
-		Data: []byte(data),
+		Data:  []byte(data),
 		Index: idx,
 	}
 }
@@ -44,8 +44,8 @@ func TestNewSQLStore_Implements(t *testing.T) {
 }
 
 func TestNewSQLStore(t *testing.T) {
-	dirPath, err :=ioutil.TempDir("", "raft")
-	if err!= nil {
+	dirPath, err := ioutil.TempDir("", "raft")
+	if err != nil {
 		t.Fatalf("err ; %s", dirPath)
 	}
 	defer os.RemoveAll(dirPath)
@@ -76,7 +76,7 @@ func TestNewSQLStore(t *testing.T) {
 	defer db.Close()
 
 	checkTableQuery := "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
-	tableNames := []string {"r_store", "r_log"}
+	tableNames := []string{"r_store", "r_log"}
 	for _, tableName := range tableNames {
 		rows, err := db.Query(checkTableQuery, tableName)
 		if err != nil {
@@ -248,7 +248,6 @@ func TestSQLStore_StoreLogs(t *testing.T) {
 		t.Fatalf("bad: %#v", result2)
 	}
 }
-
 
 func TestSQLStore_DeleteRange(t *testing.T) {
 	store := testStore(t)
