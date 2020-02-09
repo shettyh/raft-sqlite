@@ -26,8 +26,7 @@ const (
 	getLogForIndexQuery = `SELECT l_index, term, type, data FROM r_log WHERE l_index = ?`
 	storeLogQuery       = `REPLACE INTO r_log (l_index, term, type, data) VALUES (?, ?, ?, ?)`
 	deleteRangeQuery    = `DELETE FROM r_log WHERE l_index >= ? AND l_index <= ?`
-	deleteQuery = "DELETE FROM r_store where key = ?"
-	setQuery    = `INSERT INTO r_store (key, value) VALUES (?, ?)`
+	setQuery    = `REPLACE INTO r_store (key, value) VALUES (?, ?)`
 	getQuery    = `SELECT min(value) FROM r_store WHERE key = ?`
 )
 
@@ -85,6 +84,8 @@ func NewSQLStore(path string) (*SQLStore, error) {
 
 
 func newDB(path string) (*sql.DB, error) {
+	// TODO: expose the sqlite PRAGMA to outside env
+	path = fmt.Sprintf("%s?%s", path, "_locking_mode=EXCLUSIVE")
 	db, err := sql.Open(driverName, path)
 	if err != nil {
 		return nil, err
@@ -149,27 +150,8 @@ func (s SQLStore) DeleteRange(min, max uint64) error {
 
 func (s SQLStore) Set(key, val []byte) error {
 	tx, err := s.db.Begin()
-	if err != nil {
-		return err
-	}
 
-	stmt, err := tx.Prepare(deleteQuery)
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(key)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	stmt, err = tx.Prepare(setQuery)
-	if err != nil {
-		return err
-	}
-
-	_, err = stmt.Exec(string(key), val)
+	_, err = tx.Exec(setQuery, string(key), val)
 	if err != nil {
 		tx.Rollback()
 		return err
