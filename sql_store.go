@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/binary"
 	"fmt"
+
 	"github.com/hashicorp/raft"
 
 	// sql lite driver import
@@ -161,13 +162,15 @@ func (s SQLStore) Set(key, val []byte) error {
 func (s SQLStore) Get(key []byte) ([]byte, error) {
 	var value []byte
 	err := s.db.QueryRow(getQuery, string(key)).Scan(&value)
+	if (err != nil && err == sql.ErrNoRows) ||
+		(err == nil && value == nil) {
+		return nil, ErrKeyNotFound
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	if value == nil {
-		return nil, ErrKeyNotFound
-	}
 	return value, nil
 }
 
